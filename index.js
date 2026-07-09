@@ -76,15 +76,42 @@ client.once("clientready", async () => {
   }
 });
 
-client.on("interactionCreate", async interaction => {
+client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (!hasAllowedRole) {
-  return interaction.reply({
-    content: "❌ Kamu tidak memiliki izin menggunakan command ini.",
-    ephemeral: true
-  });
-}
+  try {
+    if (interaction.commandName === "announce") {
+      const allowedRoles = [
+        "1488421250916159599",
+        "1488421250958229554"
+      ];
+
+      const member = await interaction.guild.members.fetch(interaction.user.id);
+
+      const hasAllowedRole = allowedRoles.some((roleId) =>
+        member.roles.cache.has(roleId)
+      );
+
+      if (!hasAllowedRole) {
+        return interaction.reply({
+          content: "❌ Kamu tidak memiliki akses untuk menggunakan command ini.",
+          ephemeral: true
+        });
+      }
+
+      await interaction.reply("📢 Announcement berhasil dikirim!");
+    }
+  } catch (error) {
+    console.error("Error interaction:", error);
+
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({
+        content: "❌ Terjadi error saat menjalankan command.",
+        ephemeral: true
+      });
+    }
+  }
+});
 
   // ==========================
   // /mapupdate
