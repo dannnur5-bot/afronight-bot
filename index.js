@@ -32,14 +32,9 @@ if (message.content.startsWith("!mapupdate ")) {
     return message.reply("❌ Masukkan isi update.");
   }
 
-  // Ambil lampiran DULU sebelum pesan dihapus
-  const attachment = message.attachments.find(att =>
-    att.contentType?.startsWith("image/")
-);
+  const attachment = message.attachments.first();
 
-if (attachment) {
-    embed.setImage(attachment.proxyURL);
-}
+  console.log("Jumlah attachment:", message.attachments.size);
 
   const embed = new EmbedBuilder()
     .setColor("#8A2BE2")
@@ -49,6 +44,7 @@ if (attachment) {
     .setTimestamp();
 
   if (attachment) {
+    console.log("Attachment URL:", attachment.url);
     embed.setImage(attachment.url);
   }
 
