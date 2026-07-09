@@ -19,14 +19,18 @@ client.once("ready", () => {
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-  
-  if (message.content.startsWith("!mapupdate ")) {
 
+  // Command: !mapupdate
+  if (message.content.startsWith("!mapupdate ")) {
     if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
       return message.reply("❌ Kamu tidak memiliki izin.");
     }
 
-    const update = message.content.slice(11);
+    const update = message.content.slice("!mapupdate ".length).trim();
+
+    if (!update) {
+      return message.reply("❌ Masukkan isi update map terlebih dahulu.");
+    }
 
     await message.delete();
 
@@ -41,21 +45,21 @@ client.on("messageCreate", async (message) => {
       embeds: [embed]
     });
   }
-});
 
-  if (!message.content.toLowerCase().startsWith("koyap")) return;
+  // Command: koyap / koyap @user
+  if (message.content.toLowerCase().startsWith("koyap")) {
+    const user = message.mentions.users.first() || message.author;
 
-  const user = message.mentions.users.first() || message.author;
-
-  await message.reply({
-    content: `📸 Here is ${user.username}'s avatar!`,
-    files: [
-      user.displayAvatarURL({
-        extension: "png",
-        size: 4096
-      })
-    ]
-  });
+    return message.reply({
+      content: `📸 Here is ${user.username}'s avatar!`,
+      files: [
+        user.displayAvatarURL({
+          extension: "png",
+          size: 4096
+        })
+      ]
+    });
+  }
 });
 
 client.login(process.env.TOKEN);
