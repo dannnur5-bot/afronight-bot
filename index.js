@@ -41,9 +41,7 @@ client.on("messageCreate", async (message) => {
       .setFooter({ text: "Afro Night" })
       .setTimestamp();
 
-    return message.channel.send({
-      embeds: [embed]
-    });
+    return message.channel.send({ embeds: [embed] });
   }
 
   // Command: koyap / koyap @user
@@ -62,4 +60,5 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-client.login(process.env.TOKEN);
+// Ganti dengan Bot Token kamu
+client.login("MTUyNDExODA0NDc5NDY4MzQ0Mg.GFwNDB.udhW3z48aVnPjxov_X2EueZ_PPObe9aEb1wJp8");
