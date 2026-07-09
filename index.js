@@ -15,17 +15,16 @@ const client = new Client({
   ]
 });
 
-const allowedURoles = [
+// Role yang boleh memakai /announce dan /mapupdate
+const allowedRoles = [
   "1488421250958229554",
   "1488421250916159599"
 ];
 
-const hasAllowedRole = allowedRoles.some(roleId =>
-  interaction.member.roles.cache.has(roleId)
-);
-
-
-client.once("clientready", async () => {
+// ==========================
+// Bot Ready + Daftarkan Slash Command
+// ==========================
+client.once("clientReady", async () => {
   console.log(`${client.user.tag} Online!`);
 
   const commands = [
@@ -60,7 +59,7 @@ client.once("clientready", async () => {
           .setDescription("Upload gambar")
           .setRequired(false)
       )
-  ].map(cmd => cmd.toJSON());
+  ].map(command => command.toJSON());
 
   try {
     const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
@@ -71,114 +70,67 @@ client.once("clientready", async () => {
     );
 
     console.log("✅ Slash Command berhasil didaftarkan!");
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error("Gagal daftar slash command:", error);
   }
 });
 
+// ==========================
+// Slash Command Handler
+// ==========================
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
   try {
-    if (interaction.commandName === "announce") {
-      const allowedRoles = [
-        "1488421250916159599",
-        "1488421250958229554"
-      ];
+    const member = await interaction.guild.members.fetch(interaction.user.id);
 
-      const member = await interaction.guild.members.fetch(interaction.user.id);
+    const hasAllowedRole = allowedRoles.some(roleId =>
+      member.roles.cache.has(roleId)
+    );
 
-      const hasAllowedRole = allowedRoles.some((roleId) =>
-        member.roles.cache.has(roleId)
-      );
-
-      if (!hasAllowedRole) {
-        return interaction.reply({
-          content: "❌ Kamu tidak memiliki akses untuk menggunakan command ini.",
-          ephemeral: true
-        });
-      }
-
-      await interaction.reply("📢 Announcement berhasil dikirim!");
-    }
-  } catch (error) {
-    console.error("Error interaction:", error);
-
-    if (!interaction.replied && !interaction.deferred) {
-      await interaction.reply({
-        content: "❌ Terjadi error saat menjalankan command.",
+    // Batasi command ini hanya untuk Staff/Admin
+    if (!hasAllowedRole) {
+      return interaction.reply({
+        content: "❌ Kamu tidak memiliki role untuk menggunakan command ini.",
         ephemeral: true
       });
     }
-  }
-});
 
-  // ==========================
-  // /mapupdate
-  // ==========================
-  if (interaction.commandName === "mapupdate") {
-    const pesan = interaction.options.getString("pesan");
-    const gambar = interaction.options.getAttachment("gambar");
+    // ==========================
+    // /mapupdate
+    // ==========================
+    if (interaction.commandName === "mapupdate") {
+      const pesan = interaction.options.getString("pesan");
+      const gambar = interaction.options.getAttachment("gambar");
 
-    const embed = new EmbedBuilder()
-      .setColor("#8A2BE2")
-      .setTitle("🗺️ AFRO NIGHT • MAP UPDATE")
-      .setDescription(pesan)
-      .setFooter({ text: "Afro Night" })
-      .setTimestamp();
+      const embed = new EmbedBuilder()
+        .setColor("#8A2BE2")
+        .setTitle("🗺️ AFRO NIGHT • MAP UPDATE")
+        .setDescription(pesan)
+        .setFooter({ text: "Afro Night" })
+        .setTimestamp();
 
-    if (gambar) {
-      embed.setImage(gambar.url);
+      if (gambar) {
+        embed.setImage(gambar.url);
+      }
+
+      return interaction.reply({
+        embeds: [embed]
+      });
     }
 
-    return interaction.reply({
-      embeds: [embed]
-    });
-  }
+    // ==========================
+    // /announce
+    // ==========================
+    if (interaction.commandName === "announce") {
+      const pesan = interaction.options.getString("pesan");
+      const gambar = interaction.options.getAttachment("gambar");
 
-  // ==========================
-  // /announce
-  // ==========================
-  if (interaction.commandName === "announce") {
-    const pesan = interaction.options.getString("pesan");
-    const gambar = interaction.options.getAttachment("gambar");
+      const embed = new EmbedBuilder()
+        .setColor("#FFD700")
+        .setTitle("📢 AFRO NIGHT • ANNOUNCEMENT")
+        .setDescription(pesan)
+        .setFooter({ text: "Afro Night" })
+        .setTimestamp();
 
-    const embed = new EmbedBuilder()
-      .setColor("#FFD700")
-      .setTitle("📢 AFRO NIGHT • ANNOUNCEMENT")
-      .setDescription(pesan)
-      .setFooter({ text: "Afro Night" })
-      .setTimestamp();
-
-    if (gambar) {
-      embed.setImage(gambar.url);
-    }
-
-    return interaction.reply({
-      embeds: [embed]
-    });
-  }
-});
-
-// ==========================
-// Command koyap
-// ==========================
-client.on("messageCreate", async message => {
-  if (message.author.bot) return;
-
-  if (!message.content.toLowerCase().startsWith("koyap")) return;
-
-  const user = message.mentions.users.first() || message.author;
-
-  await message.reply({
-    content: `📸 Here is ${user.username}'s avatar!`,
-    files: [
-      user.displayAvatarURL({
-        extension: "png",
-        size: 4096
-      })
-    ]
-  });
-});
-
-client.login(process.env.TOKEN);
+      if (gambar
