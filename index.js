@@ -53,13 +53,18 @@ client.on("interactionCreate", async interaction => {
 
   if (interaction.commandName === "mapupdate") {
 
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return interaction.reply({
-        content: "❌ Kamu tidak memiliki izin.",
-        ephemeral: true
-      });
-    }
+    
+const allowedUsers = [
+  "781363476316028928", // 
+  "941604713080713216"  // 
+];
 
+if (!allowedUsers.includes(interaction.user.id)) {
+  return interaction.reply({
+    content: "❌ Kamu tidak memiliki izin menggunakan command ini.",
+    ephemeral: true
+  });
+}
     const pesan = interaction.options.getString("pesan");
     const gambar = interaction.options.getAttachment("gambar");
 
