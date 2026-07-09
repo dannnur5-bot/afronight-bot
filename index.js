@@ -33,7 +33,13 @@ if (message.content.startsWith("!mapupdate ")) {
   }
 
   // Ambil lampiran DULU sebelum pesan dihapus
-  const attachment = message.attachments.first();
+  const attachment = message.attachments.find(att =>
+    att.contentType?.startsWith("image/")
+);
+
+if (attachment) {
+    embed.setImage(attachment.proxyURL);
+}
 
   const embed = new EmbedBuilder()
     .setColor("#8A2BE2")
