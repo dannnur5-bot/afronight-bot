@@ -35,11 +35,17 @@ client.on("messageCreate", async (message) => {
     await message.delete();
 
     const embed = new EmbedBuilder()
-      .setColor("#8A2BE2")
-      .setTitle("🗺️ AFRO NIGHT • MAP UPDATE")
-      .setDescription(update)
-      .setFooter({ text: "Afro Night" })
-      .setTimestamp();
+  .setColor("#8A2BE2")
+  .setTitle("🗺️ AFRO NIGHT • MAP UPDATE")
+  .setDescription(update)
+  .setFooter({ text: "Afro Night" })
+  .setTimestamp();
+
+const attachment = message.attachments.first();
+
+if (attachment) {
+  embed.setImage(attachment.url);
+}
 
     return message.channel.send({ embeds: [embed] });
   }
