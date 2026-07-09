@@ -59,6 +59,38 @@ client.on("interactionCreate", async interaction => {
 
   if (interaction.commandName === "mapupdate") {
 
+    if (interaction.commandName === "announce") {
+
+  const allowedUsers = [
+    "781363476316028928",
+    "941604713080713216"
+  ];
+
+  if (!allowedUsers.includes(interaction.user.id)) {
+    return interaction.reply({
+      content: "❌ Kamu tidak memiliki izin menggunakan command ini.",
+      ephemeral: true
+    });
+  }
+
+  const pesan = interaction.options.getString("pesan");
+  const gambar = interaction.options.getAttachment("gambar");
+
+  const embed = new EmbedBuilder()
+    .setColor("#FFD700")
+    .setTitle("📢 AFRO NIGHT • ANNOUNCEMENT")
+    .setDescription(pesan)
+    .setFooter({ text: "Afro Night" })
+    .setTimestamp();
+
+  if (gambar) {
+    embed.setImage(gambar.url);
+  }
+
+  await interaction.reply({
+    embeds: [embed]
+  });
+}
     
 const allowedUsers = [
   "781363476316028928", // 
