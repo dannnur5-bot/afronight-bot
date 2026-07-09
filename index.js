@@ -2,19 +2,53 @@ const {
   Client,
   GatewayIntentBits,
   EmbedBuilder,
-  PermissionsBitField
+  PermissionsBitField,
+  REST,
+  Routes,
+  SlashCommandBuilder
 } = require("discord.js");
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
-client.once("ready", () => {
+client.once("ready", async () => {
   console.log(`${client.user.tag} Online!`);
+
+  const commands = [
+    new SlashCommandBuilder()
+      .setName("mapupdate")
+      .setDescription("Kirim update map")
+      .addStringOption(option =>
+        option
+          .setName("pesan")
+          .setDescription("Isi update map")
+          .setRequired(true)
+      )
+      .addAttachmentOption(option =>
+        option
+          .setName("gambar")
+          .setDescription("Upload gambar")
+          .setRequired(false)
+      )
+      .toJSON()
+  ];
+
+  try {
+    const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+
+    await rest.put(
+      Routes.applicationCommands(process.env.CLIENT_ID),
+      { body: commands }
+    );
+
+    console.log("✅ Slash command berhasil didaftarkan.");
+  } catch (err) {
+    console.error("Gagal mendaftarkan slash command:", err);
+  }
 });
 
 client.on("interactionCreate", async interaction => {
-
   if (!interaction.isChatInputCommand()) return;
 
   if (interaction.commandName === "mapupdate") {
@@ -44,7 +78,6 @@ client.on("interactionCreate", async interaction => {
       embeds: [embed]
     });
   }
-
 });
 
 client.login(process.env.TOKEN);
