@@ -25,7 +25,7 @@ const hasAllowedRole = allowedRoles.some(roleId =>
 );
 
 
-client.once("ready", async () => {
+client.once("clientready", async () => {
   console.log(`${client.user.tag} Online!`);
 
   const commands = [
