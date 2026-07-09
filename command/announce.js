@@ -4,13 +4,13 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("announce")
     .setDescription("Mengirim pengumuman")
-    .addStringOption(option =>
+    .addAttachmentOption(option =>
       option
         .setName("deskripsi")
         .setDescription("Isi pengumuman")
         .setRequired(true)
     )
-    .addStringOption(option =>
+    .addAttachmentOption(option =>
       option
         .setName("gambar")
         .setDescription("URL gambar (opsional)")
@@ -19,7 +19,7 @@ module.exports = {
 
   async execute(interaction) {
     const deskripsi = interaction.options.getString("deskripsi");
-    const gambar = interaction.options.getString("gambar");
+    const gambar = interaction.options.getAttachment("gambar");
 
     const embed = new EmbedBuilder()
       .setColor("#FFD700")
@@ -28,7 +28,7 @@ module.exports = {
       .setTimestamp();
 
     if (gambar) {
-      embed.setImage(gambar);
+      embed.setImage(gambar.url);
     }
 
     await interaction.reply({
