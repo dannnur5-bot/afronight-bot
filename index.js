@@ -7,6 +7,9 @@ const {
   SlashCommandBuilder
 } = require("discord.js");
 
+// ==========================
+// Discord Client
+// ==========================
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -15,11 +18,17 @@ const client = new Client({
   ]
 });
 
+// ==========================
+// Role yang boleh memakai command
+// ==========================
 const allowedRoles = [
   "1488421250958229554",
   "1488421250916159599"
 ];
 
+// ==========================
+// Daftarkan Slash Commands
+// ==========================
 client.once("clientReady", async () => {
   console.log(`${client.user.tag} Online!`);
 
@@ -36,13 +45,13 @@ client.once("clientReady", async () => {
       .addAttachmentOption(option =>
         option
           .setName("gambar")
-          .setDescription("Upload gambar")
+          .setDescription("Upload gambar opsional")
           .setRequired(false)
       ),
 
     new SlashCommandBuilder()
       .setName("announce")
-      .setDescription("Kirim pengumuman")
+      .setDescription("Kirim pengumuman + tag everyone")
       .addStringOption(option =>
         option
           .setName("pesan")
@@ -52,7 +61,7 @@ client.once("clientReady", async () => {
       .addAttachmentOption(option =>
         option
           .setName("gambar")
-          .setDescription("Upload gambar")
+          .setDescription("Upload gambar opsional")
           .setRequired(false)
       )
   ].map(command => command.toJSON());
@@ -67,10 +76,13 @@ client.once("clientReady", async () => {
 
     console.log("✅ Slash Command berhasil didaftarkan!");
   } catch (error) {
-    console.error("Gagal daftar slash command:", error);
+    console.error("❌ Gagal daftar slash command:", error);
   }
 });
 
+// ==========================
+// Slash Command Handler
+// ==========================
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -83,11 +95,14 @@ client.on("interactionCreate", async (interaction) => {
 
     if (!hasAllowedRole) {
       return interaction.reply({
-        content: "❌ Kamu tidak memiliki role untuk menggunakan command ini.",
+        content: "❌ Kamu tidak memiliki akses untuk menggunakan command ini.",
         ephemeral: true
       });
     }
 
+    // ==========================
+    // /mapupdate
+    // ==========================
     if (interaction.commandName === "mapupdate") {
       const pesan = interaction.options.getString("pesan");
       const gambar = interaction.options.getAttachment("gambar");
@@ -103,9 +118,14 @@ client.on("interactionCreate", async (interaction) => {
         embed.setImage(gambar.url);
       }
 
-      return interaction.reply({ embeds: [embed] });
+      return interaction.reply({
+        embeds: [embed]
+      });
     }
 
+    // ==========================
+    // /announce
+    // ==========================
     if (interaction.commandName === "announce") {
       const pesan = interaction.options.getString("pesan");
       const gambar = interaction.options.getAttachment("gambar");
@@ -122,25 +142,28 @@ client.on("interactionCreate", async (interaction) => {
       }
 
       return interaction.reply({
-  content: "@everyone",
-  embeds: [embed],
-  allowedMentions: {
-    parse: ["everyone"]
-  }
-});
-      
+        content: "@everyone",
+        embeds: [embed],
+        allowedMentions: {
+          parse: ["everyone"]
+        }
+      });
+    }
   } catch (error) {
     console.error("Interaction error:", error);
 
     if (!interaction.replied && !interaction.deferred) {
       await interaction.reply({
-        content: "❌ Terjadi error saat menjalankan command.",
+        content: "❌ Terjadi error saat menjalankan command. Cek Railway Logs.",
         ephemeral: true
       });
     }
   }
 });
 
+// ==========================
+// Command: koyap @user
+// ==========================
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.content.toLowerCase().startsWith("koyap")) return;
@@ -158,4 +181,7 @@ client.on("messageCreate", async (message) => {
   });
 });
 
+// ==========================
+// Login Bot
+// ==========================
 client.login(process.env.TOKEN);
