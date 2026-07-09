@@ -121,8 +121,14 @@ client.on("interactionCreate", async (interaction) => {
         embed.setImage(gambar.url);
       }
 
-      return interaction.reply({ embeds: [embed] });
-    }
+      return interaction.reply({
+  content: "@everyone",
+  embeds: [embed],
+  allowedMentions: {
+    parse: ["everyone"]
+  }
+});
+      
   } catch (error) {
     console.error("Interaction error:", error);
 
