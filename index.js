@@ -1,70 +1,28 @@
 const {
   Client,
   GatewayIntentBits,
-  EmbedBuilder,
-  PermissionsBitField,
-  REST,
-  Routes,
-  SlashCommandBuilder
+  EmbedBuilder
 } = require("discord.js");
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds]
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
 });
 
-client.once("ready", async () => {
-  console.log(`${client.user.tag} Online!`);
-
-  const commands = [
-  new SlashCommandBuilder()
-    .setName("mapupdate")
-   
-    .toJSON(),
-
-  new SlashCommandBuilder()
-    .setName("announce")
-    .setDescription("Mengirim pengumuman")
-    .addStringOption(option =>
-      option
-        .setName("pesan")
-        .setDescription("Isi pengumuman")
-        .setRequired(true)
-    )
-    .addAttachmentOption(option =>
-      option
-        .setName("gambar")
-        .setDescription("Upload gambar")
-        .setRequired(false)
-    )
-    .toJSON()
+const allowedUsers = [
+  "781363476316028928",
+  "941604713080713216"
 ];
-    
 
-  try {
-    const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
-
-    await rest.put(
-      Routes.applicationCommands(process.env.CLIENT_ID),
-      { body: commands }
-    );
-
-    console.log("✅ Slash command berhasil didaftarkan.");
-  } catch (err) {
-    console.error("Gagal mendaftarkan slash command:", err);
-  }
+client.once("ready", () => {
+  console.log(`${client.user.tag} Online!`);
 });
 
 client.on("interactionCreate", async interaction => {
   if (!interaction.isChatInputCommand()) return;
-
-  if (interaction.commandName === "mapupdate") {
-
-    if (interaction.commandName === "announce") {
-
-  const allowedUsers = [
-    "781363476316028928",
-    "941604713080713216"
-  ];
 
   if (!allowedUsers.includes(interaction.user.id)) {
     return interaction.reply({
@@ -73,36 +31,11 @@ client.on("interactionCreate", async interaction => {
     });
   }
 
-  const pesan = interaction.options.getString("pesan");
-  const gambar = interaction.options.getAttachment("gambar");
+  // ==========================
+  // /mapupdate
+  // ==========================
+  if (interaction.commandName === "mapupdate") {
 
-  const embed = new EmbedBuilder()
-    .setColor("#FFD700")
-    .setTitle("📢 AFRO NIGHT • ANNOUNCEMENT")
-    .setDescription(pesan)
-    .setFooter({ text: "Afro Night" })
-    .setTimestamp();
-
-  if (gambar) {
-    embed.setImage(gambar.url);
-  }
-
-  await interaction.reply({
-    embeds: [embed]
-  });
-}
-    
-const allowedUsers = [
-  "781363476316028928", // 
-  "941604713080713216"  // 
-];
-
-if (!allowedUsers.includes(interaction.user.id)) {
-  return interaction.reply({
-    content: "❌ Kamu tidak memiliki izin menggunakan command ini.",
-    ephemeral: true
-  });
-}
     const pesan = interaction.options.getString("pesan");
     const gambar = interaction.options.getAttachment("gambar");
 
@@ -117,8 +50,54 @@ if (!allowedUsers.includes(interaction.user.id)) {
       embed.setImage(gambar.url);
     }
 
-    await interaction.reply({
+    return interaction.reply({
       embeds: [embed]
+    });
+  }
+
+  // ==========================
+  // /announce
+  // ==========================
+  if (interaction.commandName === "announce") {
+
+    const pesan = interaction.options.getString("pesan");
+    const gambar = interaction.options.getAttachment("gambar");
+
+    const embed = new EmbedBuilder()
+      .setColor("#FFD700")
+      .setTitle("📢 AFRO NIGHT • ANNOUNCEMENT")
+      .setDescription(pesan)
+      .setFooter({ text: "Afro Night" })
+      .setTimestamp();
+
+    if (gambar) {
+      embed.setImage(gambar.url);
+    }
+
+    return interaction.reply({
+      embeds: [embed]
+    });
+  }
+});
+
+// ==========================
+// Command koyap
+// ==========================
+client.on("messageCreate", async message => {
+  if (message.author.bot) return;
+
+  if (message.content.toLowerCase().startsWith("koyap")) {
+
+    const user = message.mentions.users.first() || message.author;
+
+    return message.reply({
+      content: `📸 Here is ${user.username}'s avatar!`,
+      files: [
+        user.displayAvatarURL({
+          extension: "png",
+          size: 4096
+        })
+      ]
     });
   }
 });
