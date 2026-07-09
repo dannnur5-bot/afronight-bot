@@ -18,7 +18,7 @@ client.once("ready", async () => {
   const commands = [
   new SlashCommandBuilder()
     .setName("mapupdate")
-    ...
+   
     .toJSON(),
 
   new SlashCommandBuilder()
