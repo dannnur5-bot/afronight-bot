@@ -1,7 +1,10 @@
 const {
   Client,
   GatewayIntentBits,
-  EmbedBuilder
+  EmbedBuilder,
+  REST,
+  Routes,
+  SlashCommandBuilder
 } = require("discord.js");
 
 const client = new Client({
@@ -17,8 +20,55 @@ const allowedUsers = [
   "941604713080713216"
 ];
 
-client.once("ready", () => {
+client.once("ready", async () => {
   console.log(`${client.user.tag} Online!`);
+
+  const commands = [
+    new SlashCommandBuilder()
+      .setName("mapupdate")
+      .setDescription("Kirim update map")
+      .addStringOption(option =>
+        option
+          .setName("pesan")
+          .setDescription("Isi update map")
+          .setRequired(true)
+      )
+      .addAttachmentOption(option =>
+        option
+          .setName("gambar")
+          .setDescription("Upload gambar")
+          .setRequired(false)
+      ),
+
+    new SlashCommandBuilder()
+      .setName("announce")
+      .setDescription("Kirim pengumuman")
+      .addStringOption(option =>
+        option
+          .setName("pesan")
+          .setDescription("Isi pengumuman")
+          .setRequired(true)
+      )
+      .addAttachmentOption(option =>
+        option
+          .setName("gambar")
+          .setDescription("Upload gambar")
+          .setRequired(false)
+      )
+  ].map(cmd => cmd.toJSON());
+
+  try {
+    const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+
+    await rest.put(
+      Routes.applicationCommands(process.env.CLIENT_ID),
+      { body: commands }
+    );
+
+    console.log("✅ Slash Command berhasil didaftarkan!");
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 client.on("interactionCreate", async interaction => {
@@ -35,7 +85,6 @@ client.on("interactionCreate", async interaction => {
   // /mapupdate
   // ==========================
   if (interaction.commandName === "mapupdate") {
-
     const pesan = interaction.options.getString("pesan");
     const gambar = interaction.options.getAttachment("gambar");
 
@@ -59,7 +108,6 @@ client.on("interactionCreate", async interaction => {
   // /announce
   // ==========================
   if (interaction.commandName === "announce") {
-
     const pesan = interaction.options.getString("pesan");
     const gambar = interaction.options.getAttachment("gambar");
 
@@ -86,20 +134,19 @@ client.on("interactionCreate", async interaction => {
 client.on("messageCreate", async message => {
   if (message.author.bot) return;
 
-  if (message.content.toLowerCase().startsWith("koyap")) {
+  if (!message.content.toLowerCase().startsWith("koyap")) return;
 
-    const user = message.mentions.users.first() || message.author;
+  const user = message.mentions.users.first() || message.author;
 
-    return message.reply({
-      content: `📸 Here is ${user.username}'s avatar!`,
-      files: [
-        user.displayAvatarURL({
-          extension: "png",
-          size: 4096
-        })
-      ]
-    });
-  }
+  await message.reply({
+    content: `📸 Here is ${user.username}'s avatar!`,
+    files: [
+      user.displayAvatarURL({
+        extension: "png",
+        size: 4096
+      })
+    ]
+  });
 });
 
 client.login(process.env.TOKEN);
