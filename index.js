@@ -16,23 +16,29 @@ client.once("ready", async () => {
   console.log(`${client.user.tag} Online!`);
 
   const commands = [
-    new SlashCommandBuilder()
-      .setName("mapupdate")
-      .setDescription("Kirim update map")
-      .addStringOption(option =>
-        option
-          .setName("pesan")
-          .setDescription("Isi update map")
-          .setRequired(true)
-      )
-      .addAttachmentOption(option =>
-        option
-          .setName("gambar")
-          .setDescription("Upload gambar")
-          .setRequired(false)
-      )
-      .toJSON()
-  ];
+  new SlashCommandBuilder()
+    .setName("mapupdate")
+    ...
+    .toJSON(),
+
+  new SlashCommandBuilder()
+    .setName("announce")
+    .setDescription("Mengirim pengumuman")
+    .addStringOption(option =>
+      option
+        .setName("pesan")
+        .setDescription("Isi pengumuman")
+        .setRequired(true)
+    )
+    .addAttachmentOption(option =>
+      option
+        .setName("gambar")
+        .setDescription("Upload gambar")
+        .setRequired(false)
+    )
+    .toJSON()
+];
+    
 
   try {
     const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
