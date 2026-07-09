@@ -61,4 +61,4 @@ client.on("messageCreate", async (message) => {
 });
 
 // Ganti dengan Bot Token kamu
-client.login("MTUyNDExODA0NDc5NDY4MzQ0Mg.GycWRl.Ike3qnjjM3C2l6ZbEDxpxJYbCzsKMRPxfZosjY");
+client.login(process.env.TOKEN);
