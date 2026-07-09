@@ -53,9 +53,6 @@ if (message.content.startsWith("!mapupdate ")) {
   });
 }
 
-    return message.channel.send({ embeds: [embed] });
-  }
-
   // Command: koyap / koyap @user
   if (message.content.toLowerCase().startsWith("koyap")) {
     const user = message.mentions.users.first() || message.author;
