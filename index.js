@@ -15,10 +15,15 @@ const client = new Client({
   ]
 });
 
-const allowedUsers = [
-  "781363476316028928",
-  "941604713080713216"
+const allowedURoles = [
+  "1488421250958229554",
+  "1488421250916159599"
 ];
+
+const hasAllowedRole = allowedRoles.some(roleId =>
+  interaction.member.roles.cache.has(roleId)
+);
+
 
 client.once("ready", async () => {
   console.log(`${client.user.tag} Online!`);
@@ -74,12 +79,12 @@ client.once("ready", async () => {
 client.on("interactionCreate", async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (!allowedUsers.includes(interaction.user.id)) {
-    return interaction.reply({
-      content: "❌ Kamu tidak memiliki izin menggunakan command ini.",
-      ephemeral: true
-    });
-  }
+  if (!hasAllowedRole) {
+  return interaction.reply({
+    content: "❌ Kamu tidak memiliki izin menggunakan command ini.",
+    ephemeral: true
+  });
+}
 
   // ==========================
   // /mapupdate
