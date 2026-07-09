@@ -234,13 +234,6 @@ client.on("messageCreate", async (message) => {
 
   const input = message.content.toLowerCase().trim();
 
-  // Alias panduan OWO
-  if (owoAliases[input]) {
-    return message.reply(
-      `🎮 Gunakan command OWO ini: \`${owoAliases[input]}\``
-    );
-  }
-
   // koyap @user
   if (input.startsWith("koyap")) {
     const user = message.mentions.users.first() || message.author;
