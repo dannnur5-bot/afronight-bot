@@ -20,31 +20,37 @@ client.once("ready", () => {
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
-  // Command: !mapupdate
-  if (message.content.startsWith("!mapupdate ")) {
-    if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return message.reply("❌ Kamu tidak memiliki izin.");
-    }
+// Command: !mapupdate
+if (message.content.startsWith("!mapupdate ")) {
+  if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+    return message.reply("❌ Kamu tidak memiliki izin.");
+  }
 
-    const update = message.content.slice("!mapupdate ".length).trim();
+  const update = message.content.slice("!mapupdate ".length).trim();
 
-    if (!update) {
-      return message.reply("❌ Masukkan isi update map terlebih dahulu.");
-    }
+  if (!update) {
+    return message.reply("❌ Masukkan isi update.");
+  }
 
-    await message.delete();
+  // Ambil lampiran DULU sebelum pesan dihapus
+  const attachment = message.attachments.first();
 
-    const embed = new EmbedBuilder()
-  .setColor("#8A2BE2")
-  .setTitle("🗺️ AFRO NIGHT • MAP UPDATE")
-  .setDescription(update)
-  .setFooter({ text: "Afro Night" })
-  .setTimestamp();
+  const embed = new EmbedBuilder()
+    .setColor("#8A2BE2")
+    .setTitle("🗺️ AFRO NIGHT • MAP UPDATE")
+    .setDescription(update)
+    .setFooter({ text: "Afro Night" })
+    .setTimestamp();
 
-const attachment = message.attachments.first();
+  if (attachment) {
+    embed.setImage(attachment.url);
+  }
 
-if (attachment) {
-  embed.setImage(attachment.url);
+  await message.delete();
+
+  return message.channel.send({
+    embeds: [embed],
+  });
 }
 
     return message.channel.send({ embeds: [embed] });
