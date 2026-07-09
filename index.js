@@ -8,7 +8,19 @@ const {
 } = require("discord.js");
 
 // ==========================
-// Discord Client
+// KONFIGURASI
+// ==========================
+const TOKEN = process.env.TOKEN;
+const CLIENT_ID = process.env.CLIENT_ID;
+
+// Role yang boleh memakai /announce dan /mapupdate
+const allowedRoles = [
+  "1488421250958229554",
+  "1488421250916159599"
+];
+
+// ==========================
+// DISCORD CLIENT
 // ==========================
 const client = new Client({
   intents: [
@@ -19,20 +31,97 @@ const client = new Client({
 });
 
 // ==========================
-// Role yang boleh memakai command
+// ALIAS PANDUAN OWO
+// Member tetap mengetik command OWO sendiri.
 // ==========================
-const allowedRoles = [
-  "1488421250958229554",
-  "1488421250916159599"
-];
+const owoAliases = {
+  wh: "owo hunt",
+  hunt: "owo hunt",
+
+  wb: "owo battle",
+  battle: "owo battle",
+
+  wz: "owo zoo",
+  zoo: "owo zoo",
+
+  wcash: "owo cash",
+  owochas: "owo cash",
+
+  winv: "owo inventory",
+  inventory: "owo inventory",
+
+  wuse: "owo use <id item> <jumlah>",
+  owouse: "owo use <id item> <jumlah>",
+
+  wbuy: "owo buy <id item> <jumlah>",
+  wsell: "owo sell <id item> <jumlah>",
+  wshop: "owo shop",
+  wcrate: "owo crate",
+
+  wcf: "owo coinflip <jumlah>",
+  wslots: "owo slots <jumlah>",
+  wblackjack: "owo blackjack <jumlah>",
+
+  wlb: "owo leaderboard",
+  wtop: "owo leaderboard",
+
+  wmarry: "owo marry @user",
+  wdivorce: "owo divorce",
+  wcookie: "owo cookie @user",
+
+  wdaily: "owo daily",
+  wquest: "owo quest",
+  wquests: "owo quests",
+  wvote: "owo vote",
+
+  wanimals: "owo animals",
+  wgive: "owo give @user <jumlah>",
+  wtrade: "owo trade @user",
+
+  wweapon: "owo weapon",
+  wweapons: "owo weapon",
+
+  whelp: "owo help",
+  owohelp: "owo help",
+  wcommands: "owo help"
+};
 
 // ==========================
-// Daftarkan Slash Commands
+// CEK ROLE STAFF
+// ==========================
+async function hasPermission(interaction) {
+  if (!interaction.guild) return false;
+
+  const member = await interaction.guild.members.fetch(interaction.user.id);
+
+  return allowedRoles.some(roleId =>
+    member.roles.cache.has(roleId)
+  );
+}
+
+// ==========================
+// BOT READY + REGISTER SLASH COMMAND
 // ==========================
 client.once("clientReady", async () => {
   console.log(`${client.user.tag} Online!`);
 
   const commands = [
+    new SlashCommandBuilder()
+      .setName("announce")
+      .setDescription("Kirim pengumuman dengan tag everyone")
+      .addStringOption(option =>
+        option
+          .setName("pesan")
+          .setDescription("Isi pengumuman")
+          .setRequired(true)
+      )
+      .addAttachmentOption(option =>
+        option
+          .setName("gambar")
+          .setDescription("Gambar announcement opsional")
+          .setRequired(false)
+      ),
+
     new SlashCommandBuilder()
       .setName("mapupdate")
       .setDescription("Kirim update map")
@@ -45,32 +134,16 @@ client.once("clientReady", async () => {
       .addAttachmentOption(option =>
         option
           .setName("gambar")
-          .setDescription("Upload gambar opsional")
-          .setRequired(false)
-      ),
-
-    new SlashCommandBuilder()
-      .setName("announce")
-      .setDescription("Kirim pengumuman + tag everyone")
-      .addStringOption(option =>
-        option
-          .setName("pesan")
-          .setDescription("Isi pengumuman")
-          .setRequired(true)
-      )
-      .addAttachmentOption(option =>
-        option
-          .setName("gambar")
-          .setDescription("Upload gambar opsional")
+          .setDescription("Gambar update map opsional")
           .setRequired(false)
       )
   ].map(command => command.toJSON());
 
   try {
-    const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+    const rest = new REST({ version: "10" }).setToken(TOKEN);
 
     await rest.put(
-      Routes.applicationCommands(process.env.CLIENT_ID),
+      Routes.applicationCommands(CLIENT_ID),
       { body: commands }
     );
 
@@ -81,51 +154,22 @@ client.once("clientReady", async () => {
 });
 
 // ==========================
-// Slash Command Handler
+// SLASH COMMAND HANDLER
 // ==========================
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
   try {
-    const member = await interaction.guild.members.fetch(interaction.user.id);
+    const allowed = await hasPermission(interaction);
 
-    const hasAllowedRole = allowedRoles.some(roleId =>
-      member.roles.cache.has(roleId)
-    );
-
-    if (!hasAllowedRole) {
+    if (!allowed) {
       return interaction.reply({
         content: "❌ Kamu tidak memiliki akses untuk menggunakan command ini.",
         ephemeral: true
       });
     }
 
-    // ==========================
-    // /mapupdate
-    // ==========================
-    if (interaction.commandName === "mapupdate") {
-      const pesan = interaction.options.getString("pesan");
-      const gambar = interaction.options.getAttachment("gambar");
-
-      const embed = new EmbedBuilder()
-        .setColor("#8A2BE2")
-        .setTitle("🗺️ AFRO NIGHT • MAP UPDATE")
-        .setDescription(pesan)
-        .setFooter({ text: "Afro Night" })
-        .setTimestamp();
-
-      if (gambar) {
-        embed.setImage(gambar.url);
-      }
-
-      return interaction.reply({
-        embeds: [embed]
-      });
-    }
-
-    // ==========================
     // /announce
-    // ==========================
     if (interaction.commandName === "announce") {
       const pesan = interaction.options.getString("pesan");
       const gambar = interaction.options.getAttachment("gambar");
@@ -149,6 +193,27 @@ client.on("interactionCreate", async (interaction) => {
         }
       });
     }
+
+    // /mapupdate
+    if (interaction.commandName === "mapupdate") {
+      const pesan = interaction.options.getString("pesan");
+      const gambar = interaction.options.getAttachment("gambar");
+
+      const embed = new EmbedBuilder()
+        .setColor("#8A2BE2")
+        .setTitle("🗺️ AFRO NIGHT • MAP UPDATE")
+        .setDescription(pesan)
+        .setFooter({ text: "Afro Night" })
+        .setTimestamp();
+
+      if (gambar) {
+        embed.setImage(gambar.url);
+      }
+
+      return interaction.reply({
+        embeds: [embed]
+      });
+    }
   } catch (error) {
     console.error("Interaction error:", error);
 
@@ -162,26 +227,37 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 // ==========================
-// Command: koyap @user
+// MESSAGE COMMANDS
 // ==========================
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-  if (!message.content.toLowerCase().startsWith("koyap")) return;
 
-  const user = message.mentions.users.first() || message.author;
+  const input = message.content.toLowerCase().trim();
 
-  await message.reply({
-    content: `📸 Here is ${user.username}'s avatar!`,
-    files: [
-      user.displayAvatarURL({
-        extension: "png",
-        size: 4096
-      })
-    ]
-  });
+  // Alias panduan OWO
+  if (owoAliases[input]) {
+    return message.reply(
+      `🎮 Gunakan command OWO ini: \`${owoAliases[input]}\``
+    );
+  }
+
+  // koyap @user
+  if (input.startsWith("koyap")) {
+    const user = message.mentions.users.first() || message.author;
+
+    return message.reply({
+      content: `📸 Here is ${user.username}'s avatar!`,
+      files: [
+        user.displayAvatarURL({
+          extension: "png",
+          size: 4096
+        })
+      ]
+    });
+  }
 });
 
 // ==========================
-// Login Bot
+// LOGIN BOT
 // ==========================
-client.login(process.env.TOKEN);
+client.login(TOKEN);
